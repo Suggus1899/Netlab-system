@@ -1,0 +1,149 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+enum Difficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum LabStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ProgressStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  password     String
+  role         Role     @default(STUDENT)
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  teacherCourses Course[]         @relation("TeacherCourses")
+  enrollments    Enrollment[]
+  progress       StudentProgress[]
+  createdLabs    Lab[]            @relation("LabCreator")
+
+  @@map("users")
+}
+
+model Course {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  teacherId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  teacher     User           @relation("TeacherCourses", fields: [teacherId], references: [id])
+  enrollments Enrollment[]
+  assignments LabAssignment[]
+
+  @@map("courses")
+}
+
+model Enrollment {
+  id        String   @id @default(cuid())
+  userId    String
+  courseId   String
+  enrolledAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@map("enrollments")
+}
+
+model Lab {
+  id               String     @id @default(cuid())
+  title            String
+  description      String
+  difficulty       Difficulty
+  topic            String
+  status           LabStatus  @default(DRAFT)
+  estimatedMinutes Int
+  topologyData     Json?      // NetworkTopology JSON
+  creatorId        String
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  // Relations
+  creator     User             @relation("LabCreator", fields: [creatorId], references: [id])
+  steps       LabStep[]
+  assignments LabAssignment[]
+  progress    StudentProgress[]
+
+  @@map("labs")
+}
+
+model LabStep {
+  id           String @id @default(cuid())
+  labId        String
+  order        Int
+  title        String
+  instructions String
+  hint         String?
+  validation   Json   // StepValidation JSON
+
+  lab Lab @relation(fields: [labId], references: [id], onDelete: Cascade)
+
+  @@unique([labId, order])
+  @@map("lab_steps")
+}
+
+model LabAssignment {
+  id        String    @id @default(cuid())
+  labId     String
+  courseId   String
+  dueDate   DateTime?
+  createdAt DateTime  @default(now())
+
+  lab    Lab    @relation(fields: [labId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([labId, courseId])
+  @@map("lab_assignments")
+}
+
+model StudentProgress {
+  id          String         @id @default(cuid())
+  userId      String
+  labId       String
+  status      ProgressStatus @default(NOT_STARTED)
+  currentStep Int            @default(0)
+  score       Float?
+  topologyState Json?        // Saved topology state
+  startedAt   DateTime       @default(now())
+  completedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lab  Lab  @relation(fields: [labId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, labId])
+  @@map("student_progress")
+}

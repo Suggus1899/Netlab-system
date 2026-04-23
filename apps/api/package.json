@@ -1,0 +1,46 @@
+{
+  "name": "@si-learning/api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "cross-env DATABASE_URL=file:./dev.db JWT_SECRET=si-learning-dev-secret JWT_REFRESH_SECRET=si-learning-refresh-secret tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "lint": "eslint src/",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "cross-env DATABASE_URL=file:./dev.db tsx src/prisma/seed.ts",
+    "db:studio": "prisma studio",
+    "db:generate": "prisma generate",
+    "db:sqlite:generate": "cross-env DATABASE_URL=file:./dev.db prisma generate --schema=prisma/schema.sqlite.prisma",
+    "db:sqlite:push": "cross-env DATABASE_URL=file:./dev.db prisma db push --schema=prisma/schema.sqlite.prisma",
+    "db:sqlite:studio": "cross-env DATABASE_URL=file:./dev.db prisma studio --schema=prisma/schema.sqlite.prisma",
+    "db:sqlite:setup": "npm run db:sqlite:generate && npm run db:sqlite:push && npm run db:seed",
+    "dev:sqlite": "npm run db:sqlite:setup && tsx watch src/index.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.19.0",
+    "@si-learning/shared": "*",
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cookie-parser": "^1.4.7",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/morgan": "^1.9.9",
+    "@types/node": "^20.14.0",
+    "cross-env": "^7.0.3",
+    "prisma": "^5.19.0",
+    "tsx": "^4.16.0",
+    "typescript": "^5.5.0"
+  }
+}
