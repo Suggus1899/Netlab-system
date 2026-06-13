@@ -1,6 +1,12 @@
 import { create } from 'zustand';
 import type { UserPublic } from '@si-learning/shared';
 import { apiFetch, setAccessToken } from '../api';
+import { mockLogin, mockGetMe, initMockData, isBackendAvailable } from '../mock-api';
+
+// Initialize mock data for standalone mode
+if (typeof window !== 'undefined') {
+  initMockData();
+}
 
 interface AuthState {
   user: UserPublic | null;
@@ -21,6 +27,17 @@ export const useAuthStore = create<AuthState>((set) => ({
   login: async (email, password) => {
     set({ isLoading: true });
     try {
+      // Try real API first, fallback to mock
+      const backendAvailable = await isBackendAvailable();
+      if (!backendAvailable) {
+        // Use mock data
+        const data = mockLogin(email, password);
+        setAccessToken(data.tokens.accessToken);
+        localStorage.setItem('refreshToken', data.tokens.refreshToken);
+        set({ user: data.user as UserPublic, isAuthenticated: true, isLoading: false });
+        return;
+      }
+      
       const res = await apiFetch<{ user: UserPublic; tokens: { accessToken: string; refreshToken: string } }>(
         '/auth/login',
         { method: 'POST', body: JSON.stringify({ email, password }) },
@@ -63,12 +80,30 @@ export const useAuthStore = create<AuthState>((set) => ({
   fetchMe: async () => {
     set({ isLoading: true });
     try {
+      // Try real API first, fallback to mock
+      const backendAvailable = await isBackendAvailable();
+      if (!backendAvailable) {
+        const user = mockGetMe();
+        if (user) {
+          set({ user: user as UserPublic, isAuthenticated: true, isLoading: false });
+        } else {
+          set({ user: null, isAuthenticated: false, isLoading: false });
+        }
+        return;
+      }
+      
       const res = await apiFetch<UserPublic>('/auth/me');
       if (res.data) {
         set({ user: res.data, isAuthenticated: true, isLoading: false });
       }
     } catch {
-      set({ user: null, isAuthenticated: false, isLoading: false });
+      // Fallback to mock
+      const user = mockGetMe();
+      if (user) {
+        set({ user: user as UserPublic, isAuthenticated: true, isLoading: false });
+      } else {
+        set({ user: null, isAuthenticated: false, isLoading: false });
+      }
     }
   },
 }));

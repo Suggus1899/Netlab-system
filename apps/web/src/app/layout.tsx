@@ -21,10 +21,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es" suppressHydrationWarning>
       <body className="min-h-screen bg-background font-sans antialiased">
+        <a href="#main-content" className="skip-link">
+          Saltar al contenido principal
+        </a>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <ToastProvider>
             <ServiceWorkerRegister />
-            {children}
+            <main id="main-content" className="flex-1">
+              {children}
+            </main>
           </ToastProvider>
         </ThemeProvider>
       </body>

@@ -53,11 +53,11 @@ function DeviceNode({ data }: NodeProps<DeviceNodeData>) {
 
       {/* Icon */}
       <div className={cn('mb-1 rounded-lg p-2', colors.text)}>
-        <Icon className="h-8 w-8" strokeWidth={1.5} />
+        <Icon className="h-8 w-8" strokeWidth={1.5} aria-hidden="true" />
       </div>
 
       {/* Label */}
-      <span className="text-xs font-semibold text-foreground">{data.label}</span>
+      <span className="text-xs font-semibold text-foreground" role="img" aria-label={`${data.type}: ${data.label}`}>{data.label}</span>
 
       {/* IP badge */}
       {primaryIp && (

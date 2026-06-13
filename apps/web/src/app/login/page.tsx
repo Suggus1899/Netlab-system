@@ -3,8 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Network, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Network, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/auth-store';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -40,33 +43,29 @@ export default function LoginPage() {
         </div>
 
         {/* Card */}
-        <div className="rounded-2xl border border-border bg-white p-8 shadow-xl dark:bg-gray-900">
-          <h2 className="mb-6 text-center text-xl font-semibold">Iniciar Sesión</h2>
-
-          {error && (
-            <div className="mb-4 rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
-              {error}
+        <Card className="shadow-xl">
+          <CardContent className="pt-6">
+            <div className="text-center space-y-1 pb-6">
+              <h2 className="text-2xl font-semibold tracking-tight">Iniciar Sesión</h2>
+              <p className="text-sm text-muted-foreground">
+                Ingresa tus credenciales para acceder
+              </p>
             </div>
-          )}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <Input
+              id="email"
+              type="email"
+              label="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="tu@email.com"
+              required
+              autoComplete="email"
+              error={error}
+            />
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="email" className="mb-1.5 block text-sm font-medium">
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="tu@email.com"
-                required
-                className="w-full rounded-lg border border-input bg-background px-4 py-2.5 text-sm outline-none ring-ring transition-colors placeholder:text-muted-foreground focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="mb-1.5 block text-sm font-medium">
+            <div className="space-y-1.5">
+              <label htmlFor="password" className="text-sm font-medium leading-none">
                 Contraseña
               </label>
               <div className="relative">
@@ -77,47 +76,45 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  className="w-full rounded-lg border border-input bg-background px-4 py-2.5 pr-10 text-sm outline-none ring-ring transition-colors placeholder:text-muted-foreground focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20"
+                  autoComplete="current-password"
+                  className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 pr-10 text-sm ring-offset-background transition-all duration-200 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 hover:border-primary-400"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                  aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPassword ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
                 </button>
               </div>
             </div>
 
             <div className="flex justify-end">
-              <Link href="/forgot-password" className="text-xs font-medium text-primary-600 hover:text-primary-500">
+              <Link href="/forgot-password" className="text-sm font-medium text-primary-600 hover:text-primary-500 hover:underline transition-colors">
                 ¿Olvidaste tu contraseña?
               </Link>
             </div>
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Ingresando...
-                </>
-              ) : (
-                'Iniciar Sesión'
-              )}
-            </button>
-          </form>
+              <Button
+                type="submit"
+                className="w-full"
+                size="lg"
+                loading={isLoading}
+              >
+                {!isLoading && <ArrowRight className="h-4 w-4 mr-2" aria-hidden="true" />}
+                {isLoading ? 'Ingresando...' : 'Iniciar Sesión'}
+              </Button>
+            </form>
 
-          <p className="mt-6 text-center text-sm text-muted-foreground">
-            ¿No tienes cuenta?{' '}
-            <Link href="/register" className="font-medium text-primary-600 hover:text-primary-500">
-              Regístrate aquí
-            </Link>
-          </p>
-        </div>
+            <p className="mt-6 text-center text-sm text-muted-foreground">
+              ¿No tienes cuenta?{' '}
+              <Link href="/register" className="font-medium text-primary-600 hover:text-primary-500 hover:underline transition-colors">
+                Regístrate aquí
+              </Link>
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

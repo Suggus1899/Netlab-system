@@ -2,12 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { FlaskConical, Search, Plus, Clock, ChevronRight, X, Loader2 } from 'lucide-react';
+import { FlaskConical, Search, Plus, Clock, ChevronRight, X, Loader2, ArrowRight } from 'lucide-react';
 import { TOPICS } from '@si-learning/shared';
 import { apiFetch } from '@/lib/api';
 import { useAuthStore } from '@/lib/store/auth-store';
 import { useToast } from '@/components/ui/toast';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { mockFetchLabs, mockFetchProgress, isBackendAvailable } from '@/lib/mock-api';
 
 interface Lab {
   id: string;
@@ -28,15 +34,17 @@ const difficultyLabel: Record<string, { label: string; color: string }> = {
 
 function LabSkeleton() {
   return (
-    <div className="animate-pulse rounded-xl border border-border bg-white p-5 shadow-sm dark:bg-gray-900">
-      <div className="mb-3 flex gap-2">
-        <div className="h-5 w-20 rounded-full bg-muted" />
-        <div className="h-5 w-16 rounded-full bg-muted" />
-      </div>
-      <div className="mb-2 h-5 w-3/4 rounded bg-muted" />
-      <div className="mb-4 h-4 w-full rounded bg-muted" />
-      <div className="h-4 w-24 rounded bg-muted" />
-    </div>
+    <Card>
+      <CardContent className="pt-5">
+        <div className="mb-3 flex gap-2">
+          <Skeleton className="h-5 w-20 rounded-full" />
+          <Skeleton className="h-5 w-16 rounded-full" />
+        </div>
+        <Skeleton className="mb-2 h-5 w-3/4" />
+        <Skeleton className="mb-4 h-4 w-full" />
+        <Skeleton className="h-4 w-24" />
+      </CardContent>
+    </Card>
   );
 }
 
@@ -162,6 +170,19 @@ export default function LabsPage() {
   const fetchLabs = async () => {
     setIsLoading(true);
     try {
+      const backendAvailable = await isBackendAvailable();
+      
+      if (!backendAvailable) {
+        // Use mock data
+        const labs = mockFetchLabs();
+        const progress = mockFetchProgress();
+        setLabs(labs);
+        const map: Record<string, ProgressItem> = {};
+        progress.forEach((p: any) => { map[p.labId] = p; });
+        setProgressMap(map);
+        return;
+      }
+      
       const [labsRes, progressRes] = await Promise.allSettled([
         apiFetch<Lab[]>('/labs'),
         isStudent ? apiFetch<ProgressItem[]>('/progress') : Promise.resolve({ data: [] }),
@@ -196,17 +217,16 @@ export default function LabsPage() {
           <p className="mt-1 text-muted-foreground">Explora los laboratorios guiados disponibles</p>
         </div>
         {canCreate && (
-          <button onClick={() => setShowCreate(true)}
-            className="flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700">
-            <Plus className="h-4 w-4" /> Crear Lab
-          </button>
+          <Button onClick={() => setShowCreate(true)}>
+            <Plus className="h-4 w-4 mr-1" aria-hidden="true" /> Crear Lab
+          </Button>
         )}
       </div>
 
       {/* Filters */}
       <div className="flex flex-col gap-4 sm:flex-row">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
           <input type="text" placeholder="Buscar laboratorios..." value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded-lg border border-input bg-background py-2.5 pl-10 pr-4 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
@@ -225,7 +245,7 @@ export default function LabsPage() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border p-12 text-center">
-          <FlaskConical className="mx-auto h-12 w-12 text-muted-foreground/40" />
+          <FlaskConical className="mx-auto h-12 w-12 text-muted-foreground/40" aria-hidden="true" />
           <p className="mt-4 font-medium">
             {search || selectedTopic ? 'No hay laboratorios que coincidan' : 'No hay laboratorios disponibles'}
           </p>
@@ -233,10 +253,9 @@ export default function LabsPage() {
             {search || selectedTopic ? 'Prueba con otros filtros' : canCreate ? 'Crea el primer laboratorio' : 'Vuelve más tarde'}
           </p>
           {canCreate && !search && !selectedTopic && (
-            <button onClick={() => setShowCreate(true)}
-              className="mt-4 flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 mx-auto">
-              <Plus className="h-4 w-4" /> Crear Lab
-            </button>
+            <Button onClick={() => setShowCreate(true)} className="mt-4 mx-auto">
+              <Plus className="h-4 w-4 mr-1" aria-hidden="true" /> Crear Lab
+            </Button>
           )}
         </div>
       ) : (
@@ -245,27 +264,32 @@ export default function LabsPage() {
             const diff = difficultyLabel[lab.difficulty] ?? difficultyLabel.BEGINNER;
             const prog = progressMap[lab.id];
             return (
-              <Link key={lab.id} href={`/labs/${lab.id}`}
-                className="group flex flex-col rounded-xl border border-border bg-white p-5 shadow-sm transition-all hover:shadow-md dark:bg-gray-900">
-                <div className="mb-3 flex flex-wrap gap-2">
-                  <span className={cn('rounded-full px-2.5 py-0.5 text-xs font-medium', diff.color)}>{diff.label}</span>
-                  <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">{lab.topic}</span>
-                  {prog && (
-                    <span className={cn('rounded-full px-2.5 py-0.5 text-xs font-medium', progressColor[prog.status])}>
-                      {progressLabel[prog.status] || prog.status}
-                      {prog.status === 'COMPLETED' && prog.score !== null && ` · ${prog.score}%`}
-                    </span>
-                  )}
-                </div>
-                <h3 className="mb-1.5 font-semibold group-hover:text-primary-600">{lab.title}</h3>
-                <p className="mb-4 flex-1 text-sm text-muted-foreground line-clamp-2">{lab.description}</p>
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{lab.estimatedMinutes} min</span>
-                  <span className="flex items-center gap-1 text-primary-600 group-hover:underline">
-                    {prog?.status === 'IN_PROGRESS' ? 'Continuar' : prog?.status === 'COMPLETED' ? 'Revisar' : 'Empezar'}
-                    <ChevronRight className="h-3.5 w-3.5" />
-                  </span>
-                </div>
+              <Link key={lab.id} href={`/labs/${lab.id}`} className="group block">
+                <Card className="h-full transition-all duration-200 hover:shadow-soft hover:border-primary-300">
+                  <CardContent className="pt-5 flex flex-col h-full">
+                    <div className="mb-3 flex flex-wrap gap-2">
+                      <Badge variant={lab.difficulty === 'BEGINNER' ? 'success' : lab.difficulty === 'INTERMEDIATE' ? 'warning' : 'destructive'}>
+                        {diff.label}
+                      </Badge>
+                      <Badge variant="outline">{lab.topic}</Badge>
+                      {prog && (
+                        <Badge variant={prog.status === 'COMPLETED' ? 'success' : 'default'}>
+                          {progressLabel[prog.status] || prog.status}
+                          {prog.status === 'COMPLETED' && prog.score !== null && ` · ${prog.score}%`}
+                        </Badge>
+                      )}
+                    </div>
+                    <h3 className="mb-1.5 font-semibold group-hover:text-primary-600 transition-colors">{lab.title}</h3>
+                    <p className="mb-4 flex-1 text-sm text-muted-foreground line-clamp-2">{lab.description}</p>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" aria-hidden="true" />{lab.estimatedMinutes} min</span>
+                      <span className="flex items-center gap-1 text-primary-600 group-hover:underline font-medium">
+                        {prog?.status === 'IN_PROGRESS' ? 'Continuar' : prog?.status === 'COMPLETED' ? 'Revisar' : 'Empezar'}
+                        <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
               </Link>
             );
           })}

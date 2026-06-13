@@ -2,10 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { FlaskConical, CheckCircle2, Clock, Play, TrendingUp } from 'lucide-react';
+import { FlaskConical, CheckCircle2, Clock, Play, TrendingUp, ArrowRight } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { BadgeGrid, computeBadges } from './badge-grid';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Skeleton, SkeletonText } from '@/components/ui/skeleton';
+import { mockFetchProgress, isBackendAvailable } from '@/lib/mock-api';
 
 interface ProgressItem {
   id: string;
@@ -34,8 +38,14 @@ export function StudentDashboard() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await apiFetch<ProgressItem[]>('/progress');
-        if (res.data) setProgress(res.data as ProgressItem[]);
+        const backendAvailable = await isBackendAvailable();
+        if (!backendAvailable) {
+          const progress = mockFetchProgress();
+          setProgress(progress);
+        } else {
+          const res = await apiFetch<ProgressItem[]>('/progress');
+          if (res.data) setProgress(res.data as ProgressItem[]);
+        }
       } catch { /* API not connected */ }
       setLoading(false);
     }
@@ -52,44 +62,84 @@ export function StudentDashboard() {
     <div className="space-y-6">
       {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-xl border border-border bg-white p-5 shadow-sm dark:bg-gray-900">
-          <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-green-100 p-2 dark:bg-green-900/30"><CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" /></div>
-            <div><p className="text-sm text-muted-foreground">Completados</p><p className="text-2xl font-bold">{loading ? '...' : completed}</p></div>
-          </div>
-        </div>
-        <div className="rounded-xl border border-border bg-white p-5 shadow-sm dark:bg-gray-900">
-          <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-amber-100 p-2 dark:bg-amber-900/30"><Clock className="h-5 w-5 text-amber-600 dark:text-amber-400" /></div>
-            <div><p className="text-sm text-muted-foreground">En progreso</p><p className="text-2xl font-bold">{loading ? '...' : inProg}</p></div>
-          </div>
-        </div>
-        <div className="rounded-xl border border-border bg-white p-5 shadow-sm dark:bg-gray-900">
-          <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-purple-100 p-2 dark:bg-purple-900/30"><TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400" /></div>
-            <div><p className="text-sm text-muted-foreground">Puntuación media</p><p className="text-2xl font-bold">{loading ? '...' : `${avgScore}%`}</p></div>
-          </div>
-        </div>
+        <Card className="transition-all duration-200 hover:shadow-soft">
+          <CardContent className="pt-5">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-green-100 p-2 dark:bg-green-900/30">
+                <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" aria-hidden="true" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Completados</p>
+                {loading ? <Skeleton className="mt-1 h-7 w-12" /> : <p className="text-2xl font-bold">{completed}</p>}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="transition-all duration-200 hover:shadow-soft">
+          <CardContent className="pt-5">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-amber-100 p-2 dark:bg-amber-900/30">
+                <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400" aria-hidden="true" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">En progreso</p>
+                {loading ? <Skeleton className="mt-1 h-7 w-12" /> : <p className="text-2xl font-bold">{inProg}</p>}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="transition-all duration-200 hover:shadow-soft">
+          <CardContent className="pt-5">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-purple-100 p-2 dark:bg-purple-900/30">
+                <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400" aria-hidden="true" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Puntuación media</p>
+                {loading ? <Skeleton className="mt-1 h-7 w-16" /> : <p className="text-2xl font-bold">{avgScore}%</p>}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Badges */}
       {!loading && <BadgeGrid badges={computeBadges(progress)} />}
 
       {/* Progress list */}
-      <div className="rounded-xl border border-border bg-white dark:bg-gray-900">
-        <div className="border-b border-border px-4 py-3">
-          <h3 className="font-semibold">Mi Progreso</h3>
-        </div>
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg">Mi Progreso</CardTitle>
+        </CardHeader>
         <div className="divide-y divide-border">
-          {loading && <p className="px-4 py-8 text-center text-muted-foreground">Cargando...</p>}
-          {!loading && progress.length === 0 && (
-            <div className="px-4 py-8 text-center">
-              <FlaskConical className="mx-auto h-8 w-8 text-muted-foreground/40" />
-              <p className="mt-2 text-sm text-muted-foreground">Aún no has comenzado ningún laboratorio</p>
-              <Link href="/labs" className="mt-3 inline-block rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700">
-                Explorar Labs
-              </Link>
+          {loading && (
+            <div className="px-4 py-6 space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-center gap-4">
+                  <Skeleton className="h-10 w-10 rounded-lg" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
+                  </div>
+                </div>
+              ))}
             </div>
+          )}
+          {!loading && progress.length === 0 && (
+            <CardContent className="pt-0">
+              <div className="px-4 py-8 text-center">
+                <div className="mx-auto w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mb-4">
+                  <FlaskConical className="h-8 w-8 text-primary-600 dark:text-primary-400" aria-hidden="true" />
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">Aún no has comenzado ningún laboratorio</p>
+                <Link href="/labs" className="inline-flex items-center gap-2">
+                  <Button>
+                    Explorar Labs
+                    <ArrowRight className="h-4 w-4 ml-1" aria-hidden="true" />
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
           )}
           {progress.map((item) => (
             <div key={item.id} className="flex items-center gap-4 px-4 py-3 hover:bg-muted/50">
@@ -97,8 +147,8 @@ export function StudentDashboard() {
                 item.status === 'COMPLETED' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-amber-100 dark:bg-amber-900/30'
               )}>
                 {item.status === 'COMPLETED'
-                  ? <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
-                  : <Play className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                  ? <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" aria-hidden="true" />
+                  : <Play className="h-5 w-5 text-amber-600 dark:text-amber-400" aria-hidden="true" />
                 }
               </div>
               <div className="flex-1 min-w-0">
@@ -116,7 +166,7 @@ export function StudentDashboard() {
             </div>
           ))}
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

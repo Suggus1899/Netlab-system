@@ -2,11 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { FlaskConical, Network, BookOpen, TrendingUp, Clock, CheckCircle2 } from 'lucide-react';
+import { FlaskConical, Network, BookOpen, TrendingUp, Clock, CheckCircle2, ArrowRight } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/auth-store';
 import { apiFetch } from '@/lib/api';
 import { TeacherDashboard } from '@/components/dashboard/teacher-dashboard';
 import { StudentDashboard } from '@/components/dashboard/student-dashboard';
+import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { mockFetchLabs, mockFetchCourses, mockFetchProgress, isBackendAvailable } from '@/lib/mock-api';
 
 interface ProgressEntry { status: string; score: number | null }
 
@@ -20,21 +23,23 @@ function StatCard({ icon, label, value, bgColor, iconColor, loading }: {
   icon: React.ReactNode; label: string; value: string | number; bgColor: string; iconColor: string; loading: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-white p-6 shadow-sm dark:bg-gray-900">
-      <div className="flex items-center gap-3">
-        <div className={`rounded-lg p-2 ${bgColor}`}>
-          <div className={iconColor}>{icon}</div>
+    <Card className="transition-all duration-200 hover:shadow-soft">
+      <CardContent className="pt-6">
+        <div className="flex items-center gap-3">
+          <div className={`rounded-lg p-2 ${bgColor}`}>
+            <div className={iconColor}>{icon}</div>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">{label}</p>
+            {loading ? (
+              <Skeleton className="mt-1 h-7 w-12" />
+            ) : (
+              <p className="text-2xl font-bold">{value}</p>
+            )}
+          </div>
         </div>
-        <div>
-          <p className="text-sm text-muted-foreground">{label}</p>
-          {loading ? (
-            <div className="mt-1 h-7 w-10 animate-pulse rounded bg-muted" />
-          ) : (
-            <p className="text-2xl font-bold">{value}</p>
-          )}
-        </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -50,6 +55,23 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
+        const backendAvailable = await isBackendAvailable();
+        
+        if (!backendAvailable) {
+          // Use mock data
+          const labs = mockFetchLabs();
+          const courses = mockFetchCourses();
+          const progress = mockFetchProgress();
+          
+          setLabCount(labs.length);
+          setCourseCount(courses.length);
+          setCompleted(progress.filter((p: any) => p.status === 'COMPLETED').length);
+          setInProgress(progress.filter((p: any) => p.status === 'IN_PROGRESS').length);
+          const scores = progress.filter((p: any) => p.score !== null).map((p: any) => p.score);
+          setAvgScore(scores.length ? Math.round(scores.reduce((a: number, b: number) => a + b, 0) / scores.length) : null);
+          return;
+        }
+        
         const [labsRes, coursesRes, progressRes] = await Promise.allSettled([
           apiFetch<unknown[]>('/labs'),
           apiFetch<unknown[]>('/courses'),
@@ -112,12 +134,20 @@ export default function DashboardPage() {
           {quickActions.map((action) => {
             const Icon = action.icon;
             return (
-              <Link key={action.href} href={action.href}
-                className="group flex items-center gap-4 rounded-xl border border-border bg-white p-5 shadow-sm transition-all hover:shadow-md dark:bg-gray-900">
-                <div className={`rounded-lg p-3 text-white ${action.color}`}>
-                  <Icon className="h-6 w-6" />
-                </div>
-                <span className="font-medium group-hover:text-primary-600">{action.label}</span>
+              <Link key={action.href} href={action.href} className="group block">
+                <Card className="transition-all duration-200 hover:shadow-soft hover:border-primary-300">
+                  <CardContent className="pt-5">
+                    <div className="flex items-center gap-4">
+                      <div className={`rounded-lg p-3 text-white ${action.color} transition-transform duration-200 group-hover:scale-105`}>
+                        <Icon className="h-6 w-6" aria-hidden="true" />
+                      </div>
+                      <div className="flex-1">
+                        <span className="font-medium group-hover:text-primary-600 transition-colors">{action.label}</span>
+                      </div>
+                      <ArrowRight className="h-5 w-5 text-muted-foreground opacity-0 -translate-x-2 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0" aria-hidden="true" />
+                    </div>
+                  </CardContent>
+                </Card>
               </Link>
             );
           })}

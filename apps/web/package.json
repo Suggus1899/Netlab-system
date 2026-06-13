@@ -12,13 +12,14 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@radix-ui/react-slot": "^1.2.5",
     "@reactflow/core": "^11.11.4",
     "@si-learning/shared": "*",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "framer-motion": "^11.3.0",
     "lucide-react": "^0.424.0",
-    "next": "^14.2.5",
+    "next": "^16.2.9",
     "next-themes": "^0.3.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

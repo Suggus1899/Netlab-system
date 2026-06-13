@@ -14,8 +14,9 @@ import {
   Moon,
   Menu,
   X,
+  Keyboard,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/lib/store/auth-store';
 import { useToast } from '@/components/ui/toast';
 import { cn } from '@/lib/utils';
@@ -34,6 +35,18 @@ export function Navbar() {
   const { user, logout } = useAuthStore();
   const { toast } = useToast();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Keyboard shortcut for theme toggle (Ctrl/Cmd+Shift+L)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'L') {
+        e.preventDefault();
+        setTheme(theme === 'dark' ? 'light' : 'dark');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [theme, setTheme]);
 
   const handleLogout = () => {
     logout();
@@ -63,13 +76,14 @@ export function Navbar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                  'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200',
                   isActive
                     ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300'
                     : 'text-muted-foreground hover:bg-muted hover:text-foreground',
                 )}
+                aria-current={isActive ? 'page' : undefined}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="h-4 w-4" aria-hidden="true" />
                 {item.label}
               </Link>
             );
@@ -80,11 +94,12 @@ export function Navbar() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            className="relative rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
-            aria-label="Cambiar tema"
+            className="relative rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label={`Cambiar a modo ${theme === 'dark' ? 'claro' : 'oscuro'} (Ctrl+Shift+L)`}
+            title="Cambiar tema (Ctrl+Shift+L)"
           >
-            <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute left-2 top-2 h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+            <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" aria-hidden="true" />
+            <Moon className="absolute left-2 top-2 h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" aria-hidden="true" />
           </button>
 
           {user && (
@@ -101,10 +116,10 @@ export function Navbar() {
               </Link>
               <button
                 onClick={handleLogout}
-                className="rounded-lg p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                className="rounded-lg p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:ring-2 focus-visible:ring-ring"
                 aria-label="Cerrar sesión"
               >
-                <LogOut className="h-4 w-4" />
+                <LogOut className="h-4 w-4" aria-hidden="true" />
               </button>
             </div>
           )}
@@ -112,17 +127,22 @@ export function Navbar() {
           {/* Mobile hamburger */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="rounded-lg p-2 text-muted-foreground hover:bg-muted md:hidden"
-            aria-label="Menú"
+            className="rounded-lg p-2 text-muted-foreground hover:bg-muted md:hidden focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label={mobileOpen ? 'Cerrar menú' : 'Abrir menú'}
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-menu"
           >
-            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {mobileOpen ? <X className="h-5 w-5" aria-hidden="true" /> : <Menu className="h-5 w-5" aria-hidden="true" />}
           </button>
         </div>
       </div>
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="border-t border-border px-4 pb-4 pt-2 md:hidden">
+        <div
+          id="mobile-menu"
+          className="border-t border-border px-4 pb-4 pt-2 md:hidden animate-slide-down"
+        >
           {filteredNav.map((item) => {
             const Icon = item.icon;
             const isActive = pathname.startsWith(item.href);
@@ -132,13 +152,14 @@ export function Navbar() {
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
                 className={cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-colors',
+                  'flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all duration-200',
                   isActive
                     ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300'
                     : 'text-muted-foreground hover:bg-muted hover:text-foreground',
                 )}
+                aria-current={isActive ? 'page' : undefined}
               >
-                <Icon className="h-5 w-5" />
+                <Icon className="h-5 w-5" aria-hidden="true" />
                 {item.label}
               </Link>
             );

@@ -32,7 +32,13 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ toast }}>
       {children}
-      <div className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2">
+      <div
+        className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2"
+        aria-live="polite"
+        aria-atomic="true"
+        role="region"
+        aria-label="Notifications"
+      >
         {toasts.map((t) => (
           <ToastItem key={t.id} toast={t} onClose={() => setToasts((prev) => prev.filter((x) => x.id !== t.id))} />
         ))}
@@ -64,8 +70,12 @@ function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
     >
       {icons[toast.type]}
       <p className="flex-1 text-sm font-medium">{toast.message}</p>
-      <button onClick={onClose} className="ml-2 text-muted-foreground hover:text-foreground">
-        <X className="h-4 w-4" />
+      <button
+        onClick={onClose}
+        className="ml-2 rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+        aria-label="Cerrar notificación"
+      >
+        <X className="h-4 w-4" aria-hidden="true" />
       </button>
     </div>
   );
