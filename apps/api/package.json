@@ -15,7 +15,10 @@
     "db:sqlite:push": "cross-env DATABASE_URL=file:./dev.db prisma db push --schema=prisma/schema.sqlite.prisma",
     "db:sqlite:studio": "cross-env DATABASE_URL=file:./dev.db prisma studio --schema=prisma/schema.sqlite.prisma",
     "db:sqlite:setup": "npm run db:sqlite:generate && npm run db:sqlite:push && npm run db:seed",
-    "dev:sqlite": "npm run db:sqlite:setup && tsx watch src/index.ts"
+    "dev:sqlite": "npm run db:sqlite:setup && tsx watch src/index.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@prisma/client": "^5.19.0",
@@ -38,9 +41,13 @@
     "@types/jsonwebtoken": "^9.0.6",
     "@types/morgan": "^1.9.9",
     "@types/node": "^20.14.0",
+    "@types/supertest": "^7.2.0",
+    "@vitest/coverage-v8": "^4.1.5",
     "cross-env": "^7.0.3",
     "prisma": "^5.19.0",
+    "supertest": "^7.2.2",
     "tsx": "^4.16.0",
-    "typescript": "^5.5.0"
+    "typescript": "^5.5.0",
+    "vitest": "^4.1.5"
   }
 }

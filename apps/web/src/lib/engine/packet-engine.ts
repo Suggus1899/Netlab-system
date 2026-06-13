@@ -1,4 +1,5 @@
-import type { NetworkDevice, NetworkLink, PacketEvent, OSILayer, FirewallRule, RoutingEntry } from '@si-learning/shared';
+import type { NetworkDevice, NetworkLink, PacketEvent, OSILayer, RoutingEntry } from '@si-learning/shared';
+import { evaluateFirewallVerdict } from './firewall';
 
 // ─── Shared utilities ─────────────────────────────────────────────────────────
 
@@ -86,44 +87,6 @@ export function findPath(ctx: SimContext, sourceId: string, targetId: string): s
   return [];
 }
 
-// ─── Firewall enforcement ─────────────────────────────────────────────────────
-
-function ipMatchesPattern(ip: string, pattern: string): boolean {
-  if (pattern === '*' || pattern === 'any') return true;
-  if (pattern.includes('/')) {
-    const [net, bits] = pattern.split('/');
-    const mask = ~((1 << (32 - parseInt(bits))) - 1) >>> 0;
-    return (toNum(ip) & mask) === (toNum(net) & mask);
-  }
-  return ip === pattern;
-}
-
-/**
- * Returns 'ALLOW' | 'DENY' for a packet crossing a firewall device.
- * Evaluates rules in order; first match wins. Default: ALLOW if no rules.
- */
-export function evaluateFirewall(
-  firewallDevice: NetworkDevice,
-  srcIp: string,
-  dstIp: string,
-  protocol: string,
-  port?: number,
-): 'ALLOW' | 'DENY' {
-  const rules: FirewallRule[] = firewallDevice.config?.firewallRules || [];
-  if (rules.length === 0) return 'ALLOW';
-
-  for (const rule of [...rules].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))) {
-    const protoMatch = rule.protocol === 'ANY' || rule.protocol === protocol.toUpperCase();
-    const srcMatch = ipMatchesPattern(srcIp, rule.sourceIp);
-    const dstMatch = ipMatchesPattern(dstIp, rule.destinationIp);
-    const portMatch = !rule.port || !port || rule.port === port;
-    if (protoMatch && srcMatch && dstMatch && portMatch) {
-      return rule.action;
-    }
-  }
-  return 'ALLOW';
-}
-
 // ─── Hop event builder ────────────────────────────────────────────────────────
 
 function hopEvents(
@@ -148,7 +111,7 @@ function hopEvents(
 
     // Firewall check: if the NEXT device is a FIREWALL, evaluate before sending
     if (checkFirewall && td.type === 'FIREWALL') {
-      const verdict = evaluateFirewall(td, srcIp, dstIp, appProtocol);
+      const verdict = evaluateFirewallVerdict(td, srcIp, dstIp, appProtocol);
       events.push({
         id: uid(), timestamp: ts++,
         fromDeviceId: path[i], toDeviceId: td.id, linkId: link.id,
