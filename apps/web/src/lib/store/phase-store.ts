@@ -42,8 +42,8 @@ export const usePhaseStore = create<PhaseState>()(
             const result = await demoPhases.getLabPhases(labId);
             if (result.success) {
               set({
-                phases: result.data.phases,
-                stats: result.data.stats,
+                phases: result.data.phases as Phase[],
+                stats: result.data.stats as PhaseStats,
                 currentLabId: labId,
                 loading: false,
               });
@@ -110,7 +110,7 @@ export const usePhaseStore = create<PhaseState>()(
                 await get().loadPhases(currentLabId);
               }
               set({ loading: false });
-              return result.data;
+              return result.data as PhaseAttemptResult;
             }
             throw new Error('Error validando intento en modo demo');
           }
@@ -149,7 +149,7 @@ export const usePhaseStore = create<PhaseState>()(
           if (isDemoMode()) {
             const result = await demoPhases.getHint(phaseId);
             if (result.success) {
-              return result.data;
+              return result.data as PhaseHintResult;
             }
             return null;
           }
