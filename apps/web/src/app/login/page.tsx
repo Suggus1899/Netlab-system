@@ -3,12 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Network, Eye, EyeOff, ArrowRight, FlaskConical } from 'lucide-react';
+import { Network, Eye, EyeOff, ArrowRight, FlaskConical, Shield, Cpu, Globe } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/auth-store';
 import { useDemoStore } from '@/lib/store/demo-store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -41,44 +40,118 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-primary-50 via-white to-accent-50 px-4 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
-      <div className="w-full max-w-md">
+    <div className="flex min-h-screen">
+      {/* Left panel — branding */}
+      <div className="relative hidden lg:flex lg:w-1/2 flex-col justify-between bg-gray-950 p-12 overflow-hidden">
+        {/* Grid background */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+          style={{
+            backgroundImage:
+              'linear-gradient(rgba(99,102,241,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.08) 1px, transparent 1px)',
+            backgroundSize: '40px 40px',
+          }}
+        />
+        {/* Glow accent */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -top-32 -left-32 h-[480px] w-[480px] rounded-full bg-primary-600/20 blur-[120px]"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -bottom-32 -right-32 h-[360px] w-[360px] rounded-full bg-teal-500/15 blur-[100px]"
+        />
+
         {/* Logo */}
-        <div className="mb-8 flex flex-col items-center">
-          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-500 text-white shadow-lg">
-            <Network className="h-8 w-8" />
+        <div className="relative z-10 flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-600 shadow-lg shadow-primary-600/40">
+            <Network className="h-5 w-5 text-white" aria-hidden="true" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight">SI Learning Red</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Simulación interactiva para la enseñanza de redes
-          </p>
+          <span className="text-lg font-bold text-white">SI Learning Red</span>
         </div>
 
-        {/* Card */}
-        <Card className="shadow-xl">
-          <CardContent className="pt-6">
-            <div className="text-center space-y-1 pb-6">
-              <h2 className="text-2xl font-semibold tracking-tight">Iniciar Sesión</h2>
-              <p className="text-sm text-muted-foreground">
-                Ingresa tus credenciales para acceder
-              </p>
+        {/* Main copy */}
+        <div className="relative z-10 space-y-8">
+          <div className="space-y-4">
+            <h2 className="text-4xl font-bold leading-tight text-white">
+              Aprende redes
+              <br />
+              <span className="text-primary-400">de forma práctica</span>
+            </h2>
+            <p className="max-w-sm text-base text-gray-400 leading-relaxed">
+              Simulador interactivo con laboratorios guiados, validación automática y progreso en tiempo real.
+            </p>
+          </div>
+
+          {/* Feature pills */}
+          <div className="flex flex-col gap-3">
+            {[
+              { icon: Cpu, label: 'Simulador de topologías de red' },
+              { icon: Shield, label: 'Laboratorios de firewall y NAT' },
+              { icon: Globe, label: 'Protocolos IP, VLAN y enrutamiento' },
+            ].map(({ icon: Icon, label }) => (
+              <div key={label} className="flex items-center gap-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/5 border border-white/10">
+                  <Icon className="h-4 w-4 text-primary-400" aria-hidden="true" />
+                </div>
+                <span className="text-sm text-gray-300">{label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer quote */}
+        <p className="relative z-10 text-xs text-gray-600">
+          © {new Date().getFullYear()} SI Learning Red
+        </p>
+      </div>
+
+      {/* Right panel — form */}
+      <div className="flex flex-1 flex-col items-center justify-center bg-white px-6 py-12 dark:bg-gray-950 lg:px-16">
+        {/* Mobile logo */}
+        <div className="mb-8 flex flex-col items-center lg:hidden">
+          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-primary-600 shadow-lg shadow-primary-600/30">
+            <Network className="h-6 w-6 text-white" aria-hidden="true" />
+          </div>
+          <h1 className="text-xl font-bold">SI Learning Red</h1>
+        </div>
+
+        <div className="w-full max-w-sm space-y-8">
+          {/* Heading */}
+          <div className="space-y-1">
+            <h2 className="text-2xl font-bold tracking-tight">Iniciar sesión</h2>
+            <p className="text-sm text-muted-foreground">Ingresa tus credenciales para acceder</p>
+          </div>
+
+          {/* Error banner */}
+          {error && (
+            <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800/40 dark:bg-red-900/20 dark:text-red-400">
+              {error}
             </div>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <Input
-              id="email"
-              type="email"
-              label="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="tu@email.com"
-              required
-              autoComplete="email"
-              error={error}
-            />
+          )}
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+            <div className="space-y-1.5">
+              <label htmlFor="email" className="text-sm font-medium">
+                Email <span className="text-red-500" aria-hidden="true">*</span>
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="tu@email.com"
+                required
+                autoComplete="email"
+                className="flex h-11 w-full rounded-lg border border-input bg-background px-3.5 py-2 text-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:border-transparent hover:border-primary-400 disabled:cursor-not-allowed disabled:opacity-50"
+              />
+            </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="password" className="text-sm font-medium leading-none">
-                Contraseña
+              <label htmlFor="password" className="text-sm font-medium">
+                Contraseña <span className="text-red-500" aria-hidden="true">*</span>
               </label>
               <div className="relative">
                 <input
@@ -89,59 +162,74 @@ export default function LoginPage() {
                   placeholder="••••••••"
                   required
                   autoComplete="current-password"
-                  className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 pr-10 text-sm ring-offset-background transition-all duration-200 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 hover:border-primary-400"
+                  className="flex h-11 w-full rounded-lg border border-input bg-background px-3.5 py-2 pr-11 text-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:border-transparent hover:border-primary-400 disabled:cursor-not-allowed disabled:opacity-50"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
                   aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
                 </button>
               </div>
+              <div className="flex justify-end pt-0.5">
+                <Link
+                  href="/forgot-password"
+                  className="text-xs font-medium text-primary-600 hover:text-primary-500 hover:underline transition-colors"
+                >
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </div>
             </div>
 
-            <div className="flex justify-end">
-              <Link href="/forgot-password" className="text-sm font-medium text-primary-600 hover:text-primary-500 hover:underline transition-colors">
-                ¿Olvidaste tu contraseña?
-              </Link>
+            <Button type="submit" className="w-full h-11" size="lg" loading={isLoading}>
+              {!isLoading && <ArrowRight className="mr-2 h-4 w-4" aria-hidden="true" />}
+              {isLoading ? 'Ingresando...' : 'Iniciar sesión'}
+            </Button>
+          </form>
+
+          {/* Divider */}
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center" aria-hidden="true">
+              <div className="w-full border-t border-border" />
             </div>
+            <div className="relative flex justify-center">
+              <span className="bg-white px-3 text-xs text-muted-foreground dark:bg-gray-950">o prueba sin cuenta</span>
+            </div>
+          </div>
 
-              <Button
-                type="submit"
-                className="w-full"
-                size="lg"
-                loading={isLoading}
-              >
-                {!isLoading && <ArrowRight className="h-4 w-4 mr-2" aria-hidden="true" />}
-                {isLoading ? 'Ingresando...' : 'Iniciar Sesión'}
-              </Button>
-            </form>
-
-            {/* Demo Mode Section */}
+          {/* Demo button */}
+          <div className="space-y-2">
             <button
               type="button"
               onClick={handleDemoMode}
               disabled={demoLoading}
-              className="w-full mt-6 flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-teal-500/50 bg-transparent px-4 py-3 text-sm font-medium text-teal-600 transition-all hover:border-teal-500 hover:bg-teal-500/5 hover:text-teal-700 dark:border-teal-400/30 dark:text-teal-400 dark:hover:border-teal-400 dark:hover:bg-teal-400/10 dark:hover:text-teal-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group w-full flex items-center justify-center gap-2.5 rounded-lg border-2 border-dashed border-teal-500/40 bg-transparent px-4 py-3 text-sm font-medium text-teal-600 transition-all duration-200 hover:border-teal-500 hover:bg-teal-500/5 hover:text-teal-700 dark:border-teal-400/25 dark:text-teal-400 dark:hover:border-teal-400/60 dark:hover:bg-teal-400/10 dark:hover:text-teal-300 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {!demoLoading && <FlaskConical className="h-4 w-4" aria-hidden="true" />}
-              {demoLoading ? 'Iniciando...' : 'Entrar en Modo Demo'}
+              {demoLoading ? (
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-teal-500 border-t-transparent" aria-hidden="true" />
+              ) : (
+                <FlaskConical className="h-4 w-4 transition-transform group-hover:rotate-6" aria-hidden="true" />
+              )}
+              {demoLoading ? 'Iniciando demo...' : 'Entrar en Modo Demo'}
             </button>
-
-            <p className="mt-2 text-center text-xs text-muted-foreground">
-              Datos simulados — sin backend real
+            <p className="text-center text-xs text-muted-foreground">
+              Datos simulados · sin backend real
             </p>
+          </div>
 
-            <p className="mt-6 text-center text-sm text-muted-foreground">
-              ¿No tienes cuenta?{' '}
-              <Link href="/register" className="font-medium text-primary-600 hover:text-primary-500 hover:underline transition-colors">
-                Regístrate aquí
-              </Link>
-            </p>
-          </CardContent>
-        </Card>
+          {/* Register link */}
+          <p className="text-center text-sm text-muted-foreground">
+            ¿No tienes cuenta?{' '}
+            <Link
+              href="/register"
+              className="font-semibold text-primary-600 hover:text-primary-500 hover:underline transition-colors"
+            >
+              Regístrate aquí
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
