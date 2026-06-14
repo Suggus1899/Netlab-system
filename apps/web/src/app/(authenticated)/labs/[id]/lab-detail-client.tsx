@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { NetworkCanvas } from '@/components/simulator/network-canvas';
 import { LabRunner } from '@/components/labs/lab-runner';
 import { apiFetch } from '@/lib/api';
+import { demoLabs, demoProgress, isDemoMode } from '@/lib/demo-api';
 import { useNetworkStore } from '@/lib/store/network-store';
 import { cn } from '@/lib/utils';
 import type { LabStep } from '@si-learning/shared';
@@ -42,27 +43,34 @@ export default function LabDetailClient() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await apiFetch<Lab>(`/labs/${id}`);
-        if (res.data) {
-          setLab(res.data);
-          // Start progress tracking
-          try {
-            await apiFetch(`/progress/${id}/start`, { method: 'POST' });
-            setProgressStarted(true);
-          } catch {
-            setProgressStarted(true); // already started is fine
+        let labData: Lab | null = null;
+
+        if (isDemoMode()) {
+          const res = await demoLabs.getById(id);
+          labData = res.data as Lab;
+        } else {
+          const res = await apiFetch<Lab>(`/labs/${id}`);
+          labData = res.data ?? null;
+        }
+
+        if (labData) {
+          setLab(labData);
+          if (!isDemoMode()) {
+            try {
+              await apiFetch(`/progress/${id}/start`, { method: 'POST' });
+            } catch { /* already started is fine */ }
           }
+          setProgressStarted(true);
         } else {
           setError('Laboratorio no encontrado');
         }
-      } catch {
-        setError('Error al cargar el laboratorio');
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Error al cargar el laboratorio');
       } finally {
         setIsLoading(false);
       }
     }
     load();
-    // Clear the canvas topology when entering a new lab
     clearTopology();
   }, [id, clearTopology]);
 
@@ -70,10 +78,14 @@ export default function LabDetailClient() {
     setFinalScore(score);
     setCompleted(true);
     try {
-      await apiFetch(`/progress/${id}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ status: 'COMPLETED', score }),
-      });
+      if (isDemoMode()) {
+        await demoProgress.update(id, { status: 'COMPLETED', score });
+      } else {
+        await apiFetch(`/progress/${id}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ status: 'COMPLETED', score }),
+        });
+      }
     } catch { /* non-critical */ }
   };
 
