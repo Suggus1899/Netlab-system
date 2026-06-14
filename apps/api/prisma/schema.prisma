@@ -31,6 +31,19 @@ enum ProgressStatus {
   COMPLETED
 }
 
+enum PhaseType {
+  MANDATORY
+  OPTIONAL
+}
+
+enum PhaseStatus {
+  LOCKED
+  AVAILABLE
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -45,6 +58,7 @@ model User {
   teacherCourses Course[]         @relation("TeacherCourses")
   enrollments    Enrollment[]
   progress       StudentProgress[]
+  phaseProgress  PhaseProgress[]
   createdLabs    Lab[]            @relation("LabCreator")
 
   @@map("users")
@@ -89,12 +103,14 @@ model Lab {
   estimatedMinutes Int
   topologyData     Json?      // NetworkTopology JSON
   creatorId        String
+  hasPhases        Boolean    @default(false) // Indica si usa sistema de fases
   createdAt        DateTime   @default(now())
   updatedAt        DateTime   @updatedAt
 
   // Relations
   creator     User             @relation("LabCreator", fields: [creatorId], references: [id])
   steps       LabStep[]
+  phases      LabPhase[]
   assignments LabAssignment[]
   progress    StudentProgress[]
 
@@ -116,6 +132,32 @@ model LabStep {
   @@map("lab_steps")
 }
 
+model LabPhase {
+  id                String    @id @default(cuid())
+  labId             String
+  order             Int
+  type              PhaseType @default(MANDATORY)
+  title             String
+  description       String
+  theoryContent     String?   // Markdown con explicación teórica
+  instructions      String
+  validationRules   Json      // Reglas de validación
+  maxAttempts       Int       @default(3)
+  timeLimitMinutes  Int?
+  baseScore         Float     @default(100)
+  penaltyPerAttempt Float     @default(10)
+  hints             String[]  // Array de hints disponibles
+  requiredPhaseIds  String[]  // IDs de fases requeridas para desbloquear
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  lab      Lab             @relation(fields: [labId], references: [id], onDelete: Cascade)
+  progress PhaseProgress[]
+
+  @@unique([labId, order])
+  @@map("lab_phases")
+}
+
 model LabAssignment {
   id        String    @id @default(cuid())
   labId     String
@@ -130,19 +172,41 @@ model LabAssignment {
   @@map("lab_assignments")
 }
 
-model StudentProgress {
-  id          String         @id @default(cuid())
-  userId      String
-  labId       String
-  status      ProgressStatus @default(NOT_STARTED)
-  currentStep Int            @default(0)
-  score       Float?
-  topologyState Json?        // Saved topology state
-  startedAt   DateTime       @default(now())
-  completedAt DateTime?
+model PhaseProgress {
+  id             String      @id @default(cuid())
+  userId         String
+  phaseId        String
+  status         PhaseStatus @default(LOCKED)
+  attemptsUsed   Int         @default(0)
+  currentScore   Float       @default(100)
+  hintsUsed      Int         @default(0)
+  startedAt      DateTime    @default(now())
+  completedAt    DateTime?
+  lastAttemptAt  DateTime?
+  validationData Json?
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  lab  Lab  @relation(fields: [labId], references: [id], onDelete: Cascade)
+  user   User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  phase  LabPhase        @relation(fields: [phaseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, phaseId])
+  @@map("phase_progress")
+}
+
+model StudentProgress {
+  id            String         @id @default(cuid())
+  userId        String
+  labId         String
+  status        ProgressStatus @default(NOT_STARTED)
+  currentStep   Int            @default(0)
+  score         Float?
+  bonusScore    Float          @default(0)
+  totalScore    Float?
+  topologyState Json?          // Saved topology state
+  startedAt     DateTime       @default(now())
+  completedAt   DateTime?
+
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lab           Lab             @relation(fields: [labId], references: [id], onDelete: Cascade)
 
   @@unique([userId, labId])
   @@map("student_progress")

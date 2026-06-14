@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Network, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { Network, Eye, EyeOff, ArrowRight, Rocket } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/auth-store';
+import { useDemoStore } from '@/lib/store/demo-store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,6 +13,7 @@ import { Card, CardContent } from '@/components/ui/card';
 export default function LoginPage() {
   const router = useRouter();
   const { login, isLoading } = useAuthStore();
+  const { enterDemoMode, loading: demoLoading } = useDemoStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -25,6 +27,16 @@ export default function LoginPage() {
       router.push('/dashboard');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al iniciar sesión');
+    }
+  };
+
+  const handleDemoMode = async () => {
+    setError('');
+    try {
+      await enterDemoMode();
+      router.push('/dashboard');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al iniciar modo demo');
     }
   };
 
@@ -106,6 +118,34 @@ export default function LoginPage() {
                 {isLoading ? 'Ingresando...' : 'Iniciar Sesión'}
               </Button>
             </form>
+
+            {/* Demo Mode Section */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  O
+                </span>
+              </div>
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleDemoMode}
+              className="w-full border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100 hover:text-amber-900 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-200 dark:hover:bg-amber-900/30"
+              size="lg"
+              loading={demoLoading}
+            >
+              {!demoLoading && <Rocket className="h-4 w-4 mr-2" aria-hidden="true" />}
+              {demoLoading ? 'Iniciando...' : 'Probar Demo Gratis'}
+            </Button>
+
+            <p className="mt-2 text-center text-xs text-muted-foreground">
+              Explora la app sin registrarte. Tus datos no se guardarán.
+            </p>
 
             <p className="mt-6 text-center text-sm text-muted-foreground">
               ¿No tienes cuenta?{' '}

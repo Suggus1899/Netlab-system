@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import type { UserPublic } from '@si-learning/shared';
 import { apiFetch, setAccessToken } from '../api';
 import { mockLogin, mockGetMe, initMockData, isBackendAvailable } from '../mock-api';
+import { isDemoMode } from '../demo-api';
+import { DEMO_USER } from '@/types/demo';
 
 // Initialize mock data for standalone mode
 if (typeof window !== 'undefined') {
@@ -80,6 +82,19 @@ export const useAuthStore = create<AuthState>((set) => ({
   fetchMe: async () => {
     set({ isLoading: true });
     try {
+      // Check if demo mode is active
+      if (isDemoMode()) {
+        const demoUser: UserPublic = {
+          id: DEMO_USER.id,
+          email: DEMO_USER.email,
+          name: DEMO_USER.name,
+          role: DEMO_USER.role,
+          createdAt: DEMO_USER.createdAt,
+        };
+        set({ user: demoUser, isAuthenticated: true, isLoading: false });
+        return;
+      }
+
       // Try real API first, fallback to mock
       const backendAvailable = await isBackendAvailable();
       if (!backendAvailable) {

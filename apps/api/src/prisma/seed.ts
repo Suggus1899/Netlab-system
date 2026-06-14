@@ -107,14 +107,19 @@ async function main() {
   }
   console.log(`   ✓ ${labIds.length} laboratorios`);
 
-  // Assign first lab of each topic to the matching course (first 16 courses)
-  for (let i = 0; i < 16; i++) {
-    const labId = labIds[i * 5];      // first lab of each topic
+  // Assign first lab of each topic to courses (max 10 assignments, one per course)
+  const numAssignments = Math.min(10, labIds.length);
+  for (let i = 0; i < numAssignments; i++) {
+    const labId = labIds[i];
     const courseId = createdCourses[i % createdCourses.length];
-    await prisma.labAssignment.upsert({
-      where: { labId_courseId: { labId, courseId } }, update: {},
-      create: { labId, courseId },
-    });
+    try {
+      await prisma.labAssignment.upsert({
+        where: { labId_courseId: { labId, courseId } }, update: {},
+        create: { labId, courseId },
+      });
+    } catch {
+      // Skip if assignment already exists
+    }
   }
 
   console.log('✅ Seed completado!');

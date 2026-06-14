@@ -18,7 +18,9 @@ import {
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/lib/store/auth-store';
+import { useDemoStore } from '@/lib/store/demo-store';
 import { useToast } from '@/components/ui/toast';
+import { DemoBadge } from '@/components/demo/demo-badge';
 import { cn } from '@/lib/utils';
 import { Role } from '@si-learning/shared';
 
@@ -33,6 +35,7 @@ export function Navbar() {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
   const { user, logout } = useAuthStore();
+  const { isDemoMode, exitDemoMode } = useDemoStore();
   const { toast } = useToast();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -49,6 +52,10 @@ export function Navbar() {
   }, [theme, setTheme]);
 
   const handleLogout = () => {
+    // Exit demo mode if active
+    if (isDemoMode) {
+      exitDemoMode();
+    }
     logout();
     toast('Sesión cerrada correctamente', 'success');
   };
@@ -92,6 +99,9 @@ export function Navbar() {
 
         {/* Right side */}
         <div className="flex items-center gap-2">
+          {/* Demo Badge */}
+          {isDemoMode && <DemoBadge />}
+          
           <button
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
             className="relative rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"

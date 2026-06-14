@@ -9,6 +9,7 @@ import { usersRouter } from './routes/users';
 import { labsRouter } from './routes/labs';
 import { coursesRouter } from './routes/courses';
 import { progressRouter } from './routes/progress';
+import { phasesRouter } from './routes/phases';
 
 const app = express();
 
@@ -33,6 +34,7 @@ app.use('/api/users', usersRouter);
 app.use('/api/labs', labsRouter);
 app.use('/api/courses', coursesRouter);
 app.use('/api/progress', progressRouter);
+app.use('/api', phasesRouter); // Rutas de fases: /api/phases/* y /api/labs/:labId/phases
 
 // Error handler
 app.use(errorHandler);
