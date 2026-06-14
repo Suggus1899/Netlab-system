@@ -1,5 +1,6 @@
 import { DEMO_USER, DEMO_LABS, DEMO_PROGRESS, DEMO_PHASES_DATA, DEMO_STATS } from '@/types/demo';
-import type { PhaseAttemptResult, PhaseHintResult, Phase } from '@/types/phase';
+import type { PhaseAttemptResult, PhaseHintResult } from '@/types/phase';
+import { PhaseStatus } from '@/types/phase';
 
 // SessionStorage keys
 const DEMO_KEYS = {
@@ -117,7 +118,7 @@ export const demoPhases = {
     if (!isDemoMode()) throw new Error('Demo mode not active');
     
     const phases = DEMO_PHASES_DATA.phases;
-    const phase = phases.find((p: Phase) => p.id === phaseId);
+    const phase = phases.find((p) => p.id === phaseId);
     
     if (!phase) throw new Error('Phase not found');
     
@@ -134,7 +135,7 @@ export const demoPhases = {
     if (!isDemoMode()) throw new Error('Demo mode not active');
     
     const phases = DEMO_PHASES_DATA.phases;
-    const phase = phases.find((p: Phase) => p.id === phaseId);
+    const phase = phases.find((p) => p.id === phaseId);
     
     if (!phase) throw new Error('Phase not found');
     
@@ -146,7 +147,7 @@ export const demoPhases = {
         success: true,
         data: {
           success: true,
-          status: 'COMPLETED',
+          status: PhaseStatus.COMPLETED,
           score: phase.baseScore,
           attemptsUsed: phase.attemptsUsed + 1,
           attemptsRemaining: phase.maxAttempts - (phase.attemptsUsed + 1),
@@ -159,7 +160,7 @@ export const demoPhases = {
         success: false,
         data: {
           success: false,
-          status: 'IN_PROGRESS',
+          status: PhaseStatus.IN_PROGRESS,
           score: phase.currentScore - phase.penaltyPerAttempt,
           attemptsUsed: phase.attemptsUsed + 1,
           attemptsRemaining: phase.maxAttempts - (phase.attemptsUsed + 1),
@@ -174,7 +175,7 @@ export const demoPhases = {
     if (!isDemoMode()) throw new Error('Demo mode not active');
     
     const phases = DEMO_PHASES_DATA.phases;
-    const phase = phases.find((p: Phase) => p.id === phaseId);
+    const phase = phases.find((p) => p.id === phaseId);
     
     if (!phase) throw new Error('Phase not found');
     
