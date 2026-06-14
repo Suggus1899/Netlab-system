@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Network, Eye, EyeOff, ArrowRight, Rocket } from 'lucide-react';
+import { Network, Eye, EyeOff, ArrowRight, FlaskConical } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/auth-store';
 import { useDemoStore } from '@/lib/store/demo-store';
 import { Button } from '@/components/ui/button';
@@ -120,31 +120,18 @@ export default function LoginPage() {
             </form>
 
             {/* Demo Mode Section */}
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  O
-                </span>
-              </div>
-            </div>
-
-            <Button
+            <button
               type="button"
-              variant="outline"
               onClick={handleDemoMode}
-              className="w-full border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100 hover:text-amber-900 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-200 dark:hover:bg-amber-900/30"
-              size="lg"
-              loading={demoLoading}
+              disabled={demoLoading}
+              className="w-full mt-6 flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-teal-500/50 bg-transparent px-4 py-3 text-sm font-medium text-teal-600 transition-all hover:border-teal-500 hover:bg-teal-500/5 hover:text-teal-700 dark:border-teal-400/30 dark:text-teal-400 dark:hover:border-teal-400 dark:hover:bg-teal-400/10 dark:hover:text-teal-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {!demoLoading && <Rocket className="h-4 w-4 mr-2" aria-hidden="true" />}
-              {demoLoading ? 'Iniciando...' : 'Probar Demo Gratis'}
-            </Button>
+              {!demoLoading && <FlaskConical className="h-4 w-4" aria-hidden="true" />}
+              {demoLoading ? 'Iniciando...' : 'Entrar en Modo Demo'}
+            </button>
 
             <p className="mt-2 text-center text-xs text-muted-foreground">
-              Explora la app sin registrarte. Tus datos no se guardarán.
+              Datos simulados — sin backend real
             </p>
 
             <p className="mt-6 text-center text-sm text-muted-foreground">
