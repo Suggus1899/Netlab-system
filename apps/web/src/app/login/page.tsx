@@ -119,8 +119,8 @@ export default function LoginPage() {
         <div className="w-full max-w-sm space-y-6">
           {/* Heading */}
           <div className="space-y-1">
-            <h2 className="text-2xl font-bold tracking-tight text-gray-900">Iniciar sesión</h2>
-            <p className="text-sm text-gray-500">Ingresa tus credenciales para acceder</p>
+            <h2 className="text-2xl font-bold tracking-tight !text-gray-900">Iniciar sesión</h2>
+            <p className="text-sm !text-gray-500">Ingresa tus credenciales para acceder</p>
           </div>
 
           {/* Error banner */}
@@ -133,8 +133,8 @@ export default function LoginPage() {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5" noValidate>
             <div className="space-y-1.5">
-              <label htmlFor="email" className="text-sm font-medium">
-                Email <span className="text-red-500" aria-hidden="true">*</span>
+              <label htmlFor="email" className="text-sm font-medium !text-gray-700">
+                Email <span className="!text-red-500" aria-hidden="true">*</span>
               </label>
               <input
                 id="email"
@@ -149,8 +149,8 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="password" className="text-sm font-medium">
-                Contraseña <span className="text-red-500" aria-hidden="true">*</span>
+              <label htmlFor="password" className="text-sm font-medium !text-gray-700">
+                Contraseña <span className="!text-red-500" aria-hidden="true">*</span>
               </label>
               <div className="relative">
                 <input
@@ -166,7 +166,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 !text-gray-400 hover:!text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
                   aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
