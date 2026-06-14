@@ -117,11 +117,11 @@ export default function LoginPage() {
           <h1 className="text-xl font-bold">SI Learning Red</h1>
         </div>
 
-        <div className="w-full max-w-sm space-y-8">
+        <div className="w-full max-w-sm space-y-6">
           {/* Heading */}
           <div className="space-y-1">
-            <h2 className="text-2xl font-bold tracking-tight">Iniciar sesión</h2>
-            <p className="text-sm text-muted-foreground">Ingresa tus credenciales para acceder</p>
+            <h2 className="text-2xl font-bold tracking-tight text-gray-900">Iniciar sesión</h2>
+            <p className="text-sm text-gray-500">Ingresa tus credenciales para acceder</p>
           </div>
 
           {/* Error banner */}
@@ -145,7 +145,7 @@ export default function LoginPage() {
                 placeholder="tu@email.com"
                 required
                 autoComplete="email"
-                className="flex h-11 w-full rounded-lg border border-input bg-background px-3.5 py-2 text-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:border-transparent hover:border-primary-400 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-11 w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2 text-sm text-gray-900 transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent hover:border-gray-400 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500"
               />
             </div>
 
@@ -162,7 +162,7 @@ export default function LoginPage() {
                   placeholder="••••••••"
                   required
                   autoComplete="current-password"
-                  className="flex h-11 w-full rounded-lg border border-input bg-background px-3.5 py-2 pr-11 text-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:border-transparent hover:border-primary-400 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-11 w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2 pr-11 text-sm text-gray-900 transition-colors placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent hover:border-gray-400 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500"
                 />
                 <button
                   type="button"
@@ -192,10 +192,10 @@ export default function LoginPage() {
           {/* Divider */}
           <div className="relative">
             <div className="absolute inset-0 flex items-center" aria-hidden="true">
-              <div className="w-full border-t border-border" />
+              <div className="w-full border-t border-gray-200 dark:border-gray-800" />
             </div>
             <div className="relative flex justify-center">
-              <span className="bg-white px-3 text-xs text-muted-foreground dark:bg-gray-950">o prueba sin cuenta</span>
+              <span className="bg-white px-3 text-xs text-gray-400 dark:bg-gray-950 dark:text-gray-500">o prueba sin cuenta</span>
             </div>
           </div>
 
@@ -214,13 +214,13 @@ export default function LoginPage() {
               )}
               {demoLoading ? 'Iniciando demo...' : 'Entrar en Modo Demo'}
             </button>
-            <p className="text-center text-xs text-muted-foreground">
+            <p className="text-center text-xs text-gray-400">
               Datos simulados · sin backend real
             </p>
           </div>
 
           {/* Register link */}
-          <p className="text-center text-sm text-muted-foreground">
+          <p className="text-center text-sm text-gray-500">
             ¿No tienes cuenta?{' '}
             <Link
               href="/register"
