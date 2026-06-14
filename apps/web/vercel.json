@@ -1,28 +1,6 @@
 {
   "framework": "nextjs",
   "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "/api/:path*"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Demo-Mode",
-          "value": "enabled"
-        }
-      ]
-    }
-  ],
   "env": {
     "NEXT_PUBLIC_DEMO_MODE": "true",
     "NEXT_PUBLIC_API_URL": ""

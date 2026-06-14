@@ -3,11 +3,7 @@ const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@si-learning/shared'],
   
-  // Static export for Vercel
-  output: 'export',
-  distDir: 'dist',
-  
-  // Image optimization (required for static export)
+  // Image optimization
   images: {
     unoptimized: true,
   },
