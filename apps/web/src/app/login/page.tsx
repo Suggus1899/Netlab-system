@@ -40,51 +40,50 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-white">
       {/* Left panel — branding */}
-      <div className="relative hidden lg:flex lg:w-1/2 flex-col justify-between bg-gray-950 p-12 overflow-hidden">
-        {/* Grid background */}
+      <div className="relative hidden lg:flex lg:w-1/2 flex-col justify-between bg-indigo-50 p-12 overflow-hidden border-r border-indigo-100">
+        {/* Subtle dot grid */}
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0"
           style={{
-            backgroundImage:
-              'linear-gradient(rgba(99,102,241,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.08) 1px, transparent 1px)',
-            backgroundSize: '40px 40px',
+            backgroundImage: 'radial-gradient(circle, rgba(99,102,241,0.15) 1px, transparent 1px)',
+            backgroundSize: '28px 28px',
           }}
         />
-        {/* Glow accent */}
+        {/* Soft glow */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -top-32 -left-32 h-[480px] w-[480px] rounded-full bg-primary-600/20 blur-[120px]"
+          className="pointer-events-none absolute -top-20 -left-20 h-[360px] w-[360px] rounded-full bg-primary-200/60 blur-[100px]"
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -bottom-32 -right-32 h-[360px] w-[360px] rounded-full bg-teal-500/15 blur-[100px]"
+          className="pointer-events-none absolute -bottom-20 -right-20 h-[280px] w-[280px] rounded-full bg-teal-200/50 blur-[80px]"
         />
 
         {/* Logo */}
         <div className="relative z-10 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-600 shadow-lg shadow-primary-600/40">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-600 shadow-md shadow-primary-600/20">
             <Network className="h-5 w-5 text-white" aria-hidden="true" />
           </div>
-          <span className="text-lg font-bold text-white">SI Learning Red</span>
+          <span className="text-lg font-bold text-gray-800">SI Learning Red</span>
         </div>
 
         {/* Main copy */}
         <div className="relative z-10 space-y-8">
           <div className="space-y-4">
-            <h2 className="text-4xl font-bold leading-tight text-white">
+            <h2 className="text-4xl font-bold leading-tight text-gray-900">
               Aprende redes
               <br />
-              <span className="text-primary-400">de forma práctica</span>
+              <span className="text-primary-600">de forma práctica</span>
             </h2>
-            <p className="max-w-sm text-base text-gray-400 leading-relaxed">
+            <p className="max-w-sm text-base text-gray-500 leading-relaxed">
               Simulador interactivo con laboratorios guiados, validación automática y progreso en tiempo real.
             </p>
           </div>
 
-          {/* Feature pills */}
+          {/* Feature list */}
           <div className="flex flex-col gap-3">
             {[
               { icon: Cpu, label: 'Simulador de topologías de red' },
@@ -92,17 +91,17 @@ export default function LoginPage() {
               { icon: Globe, label: 'Protocolos IP, VLAN y enrutamiento' },
             ].map(({ icon: Icon, label }) => (
               <div key={label} className="flex items-center gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/5 border border-white/10">
-                  <Icon className="h-4 w-4 text-primary-400" aria-hidden="true" />
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white border border-indigo-100 shadow-sm">
+                  <Icon className="h-4 w-4 text-primary-600" aria-hidden="true" />
                 </div>
-                <span className="text-sm text-gray-300">{label}</span>
+                <span className="text-sm font-medium text-gray-700">{label}</span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Footer quote */}
-        <p className="relative z-10 text-xs text-gray-600">
+        {/* Footer */}
+        <p className="relative z-10 text-xs text-gray-400">
           © {new Date().getFullYear()} SI Learning Red
         </p>
       </div>
