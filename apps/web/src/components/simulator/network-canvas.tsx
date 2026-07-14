@@ -25,6 +25,8 @@ import {
   simulatePing, simulateARP, simulateDNS, simulateDHCP, simulateHTTP,
   type SimResult,
 } from '@/lib/engine/packet-engine';
+import { TOPOLOGY_TEMPLATES } from '@/lib/engine/topology-templates';
+import { LayoutTemplate, X } from 'lucide-react';
 import type { DeviceType } from '@si-learning/shared';
 
 const nodeTypes = { device: DeviceNode };
@@ -36,6 +38,9 @@ export function NetworkCanvas() {
 
   // Protocol selector
   const [selectedProtocol, setSelectedProtocol] = useState<SimProtocol>('PING');
+
+  // Templates panel
+  const [showTemplates, setShowTemplates] = useState(false);
 
   // Dialog state
   const [showDialog, setShowDialog] = useState(false);
@@ -74,19 +79,34 @@ export function NetworkCanvas() {
 
   // React Flow edges
   const edges: Edge[] = useMemo(
-    () =>
-      store.links.map((link) => {
-        const hasPacket = store.packetLog.some((e) => e.linkId === link.id && e.status === 'transit');
+    () => {
+      // Only animate the edge of the CURRENT (last) transit event — not all events
+      const lastEvent = store.packetLog[store.packetLog.length - 1];
+      const activeLinkId = (lastEvent && lastEvent.status === 'transit') ? lastEvent.linkId : null;
+      const activeEvent = (lastEvent && lastEvent.status === 'transit') ? lastEvent : null;
+
+      return store.links.map((link) => {
+        const isCurrent = activeLinkId === link.id;
+        // Determine packet direction: if fromDeviceId matches target, packet flows reverse
+        const isReverse = isCurrent && activeEvent != null && activeEvent.fromDeviceId === link.targetDeviceId;
         return {
           id: link.id,
           source: link.sourceDeviceId,
           target: link.targetDeviceId,
           type: 'network',
-          animated: store.isSimulating && hasPacket,
-          data: { isActive: true, hasPacket: store.isSimulating && hasPacket, packetProgress: 0, packetColor: '#3b82f6' },
+          animated: store.isSimulating && isCurrent,
+          data: {
+            isActive: true,
+            hasPacket: store.isSimulating && isCurrent,
+            packetProgress: 0,
+            packetColor: '#3b82f6',
+            isReverse,
+            eventKey: activeEvent?.id,
+          },
           selected: store.selectedLinkId === link.id,
         };
-      }),
+      });
+    },
     [store.links, store.selectedLinkId, store.isSimulating, store.packetLog],
   );
 
@@ -228,6 +248,8 @@ export function NetworkCanvas() {
           hasSelection={!!(store.selectedDeviceId || store.selectedLinkId)}
           selectedProtocol={selectedProtocol}
           onProtocolChange={setSelectedProtocol}
+          onToggleTemplates={() => setShowTemplates((v) => !v)}
+          showTemplates={showTemplates}
         />
       </div>
 
@@ -286,6 +308,47 @@ export function NetworkCanvas() {
 
       {/* Config panel */}
       <DeviceConfigPanel />
+
+      {/* Templates panel */}
+      {showTemplates && (
+        <div className="absolute left-1/2 top-20 z-30 w-72 -translate-x-1/2 rounded-2xl border border-border bg-white shadow-2xl dark:bg-gray-900">
+          <div className="flex items-center justify-between border-b border-border px-4 py-3">
+            <div className="flex items-center gap-2">
+              <LayoutTemplate className="h-4 w-4 text-primary-500" aria-hidden="true" />
+              <h3 className="text-sm font-semibold">Plantillas de red</h3>
+            </div>
+            <button
+              onClick={() => setShowTemplates(false)}
+              className="rounded-lg p-1 hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
+              aria-label="Cerrar panel de plantillas"
+            >
+              <X className="h-4 w-4" aria-hidden="true" />
+            </button>
+          </div>
+          <div className="divide-y divide-border max-h-80 overflow-y-auto">
+            {TOPOLOGY_TEMPLATES.map((tpl) => (
+              <button
+                key={tpl.id}
+                onClick={() => {
+                  const { devices, links } = tpl.build();
+                  store.loadTopology(devices, links);
+                  setShowTemplates(false);
+                }}
+                className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-muted/60 transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+              >
+                <span className="text-xl" aria-hidden="true">{tpl.icon}</span>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium">{tpl.name}</p>
+                  <p className="truncate text-xs text-muted-foreground">{tpl.description}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+          <p className="px-4 py-2.5 text-[11px] text-muted-foreground border-t border-border">
+            ⚠️ Reemplazará la topología actual
+          </p>
+        </div>
+      )}
 
       {/* Packet inspector */}
       <PacketInspector />

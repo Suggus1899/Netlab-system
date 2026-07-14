@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
-import { Monitor, Router, Network, Server, Shield, Trash2, Play, Square, RotateCcw, Download, Upload } from 'lucide-react';
+import { Monitor, Router, Network, Server, Shield, Trash2, Play, Square, RotateCcw, Download, Upload, LayoutTemplate } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DeviceType } from '@si-learning/shared';
 
@@ -19,6 +19,8 @@ interface ToolbarProps {
   hasSelection: boolean;
   selectedProtocol: SimProtocol;
   onProtocolChange: (p: SimProtocol) => void;
+  onToggleTemplates: () => void;
+  showTemplates: boolean;
 }
 
 const DEVICE_DEFS: { type: DeviceType; icon: typeof Monitor; label: string; color: string }[] = [
@@ -40,6 +42,7 @@ const PROTOCOLS: { value: SimProtocol; label: string; color: string }[] = [
 export function SimulatorToolbar({
   onAddDevice, onDelete, onSimulate, onStopSimulation, onClear,
   onExport, onImport, isSimulating, hasSelection, selectedProtocol, onProtocolChange,
+  onToggleTemplates, showTemplates,
 }: ToolbarProps) {
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -69,6 +72,22 @@ export function SimulatorToolbar({
           <span className="text-[10px] font-medium">{label}</span>
         </button>
       ))}
+
+      {/* Templates button */}
+      <button
+        onClick={onToggleTemplates}
+        disabled={isSimulating}
+        title="Plantillas de red"
+        className={cn(
+          'flex flex-col items-center gap-0.5 rounded-lg px-2.5 py-1.5 text-muted-foreground transition-colors disabled:opacity-40',
+          showTemplates
+            ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300'
+            : 'hover:bg-violet-100 hover:text-violet-600 dark:hover:bg-violet-900/40',
+        )}
+      >
+        <LayoutTemplate className="h-5 w-5" strokeWidth={1.5} />
+        <span className="text-[10px] font-medium">Plantillas</span>
+      </button>
 
       <div className="mx-1 h-8 w-px bg-border" />
 

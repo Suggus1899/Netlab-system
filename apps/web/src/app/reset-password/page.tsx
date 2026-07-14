@@ -4,6 +4,7 @@ import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Network, ArrowLeft, Loader2, KeyRound, CheckCircle2 } from 'lucide-react';
+import { API_BASE_URL } from '@si-learning/shared';
 
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
@@ -23,7 +24,7 @@ function ResetPasswordForm() {
     if (password.length < 8) { setError('La contraseña debe tener al menos 8 caracteres'); return; }
     setIsLoading(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'}/api/auth/reset-password`, {
+      const res = await fetch(`${API_BASE_URL}/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token, password }),

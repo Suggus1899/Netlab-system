@@ -8,6 +8,8 @@ export interface NetworkEdgeData {
   hasPacket: boolean;
   packetProgress: number; // 0 to 1
   packetColor: string;
+  isReverse?: boolean;
+  eventKey?: string;
 }
 
 function NetworkEdge({
@@ -32,8 +34,9 @@ function NetworkEdge({
 
   const isActive = data?.isActive ?? true;
   const hasPacket = data?.hasPacket ?? false;
-  const progress = data?.packetProgress ?? 0;
   const packetColor = data?.packetColor ?? '#3b82f6';
+  const isReverse = data?.isReverse ?? false;
+  const eventKey = data?.eventKey;
 
   return (
     <>
@@ -59,16 +62,32 @@ function NetworkEdge({
         </filter>
       </defs>
 
-      {/* Animated packet dot — loops while hasPacket is true */}
+      {/* Animated packet dot — travels once per event, direction-aware */}
       {hasPacket && (
         <>
           {/* Trailing halo */}
-          <circle r="10" fill={packetColor} opacity="0.2" filter={`url(#glow-${id})`}>
-            <animateMotion dur="1.0s" repeatCount="indefinite" path={edgePath} />
+          <circle r="10" fill={packetColor} opacity="0.2" filter={`url(#glow-${id})`}
+            key={`halo-${id}-${eventKey}`}>
+            <animateMotion
+              dur="0.35s"
+              repeatCount="indefinite"
+              path={edgePath}
+              keyPoints={isReverse ? '1;0' : '0;1'}
+              keyTimes="0;1"
+              calcMode="linear"
+            />
           </circle>
           {/* Core dot */}
-          <circle r="5" fill={packetColor} filter={`url(#glow-${id})`}>
-            <animateMotion dur="1.0s" repeatCount="indefinite" path={edgePath} />
+          <circle r="5" fill={packetColor} filter={`url(#glow-${id})`}
+            key={`dot-${id}-${eventKey}`}>
+            <animateMotion
+              dur="0.35s"
+              repeatCount="indefinite"
+              path={edgePath}
+              keyPoints={isReverse ? '1;0' : '0;1'}
+              keyTimes="0;1"
+              calcMode="linear"
+            />
           </circle>
         </>
       )}

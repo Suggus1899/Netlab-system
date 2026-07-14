@@ -1,8 +1,8 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Layers, ChevronDown, ChevronUp, ArrowRight, CheckCircle2, XCircle } from 'lucide-react';
-import { useState } from 'react';
+import { Layers, ChevronDown, ChevronUp, ArrowRight, CheckCircle2, XCircle, GripVertical } from 'lucide-react';
+import { useState, useRef, useEffect, type MouseEvent as ReactMouseEvent } from 'react';
 import { cn } from '@/lib/utils';
 import { useNetworkStore } from '@/lib/store/network-store';
 import { OSI_LAYERS } from '@si-learning/shared';
@@ -111,12 +111,68 @@ function PacketEventCard({ event, index }: { event: PacketEvent; index: number }
 export function PacketInspector() {
   const { packetLog, isSimulating } = useNetworkStore();
 
+  // ── Draggable window state ────────────────────────────────────────────────
+  const [position, setPosition] = useState({ x: 16, y: 16 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStart = useRef<{ mouseX: number; mouseY: number; posX: number; posY: number } | null>(null);
+
+  const handleDragStart = (e: ReactMouseEvent<HTMLDivElement>) => {
+    // Only drag from the header (not from buttons inside)
+    if ((e.target as HTMLElement).closest('button')) return;
+    setIsDragging(true);
+    dragStart.current = {
+      mouseX: e.clientX,
+      mouseY: e.clientY,
+      posX: position.x,
+      posY: position.y,
+    };
+  };
+
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!dragStart.current) return;
+      const dx = e.clientX - dragStart.current.mouseX;
+      const dy = e.clientY - dragStart.current.mouseY;
+      setPosition({
+        x: dragStart.current.posX + dx,
+        y: dragStart.current.posY + dy,
+      });
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      dragStart.current = null;
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging]);
+
   if (packetLog.length === 0 && !isSimulating) return null;
 
   return (
-    <div className="absolute bottom-4 left-4 z-10 w-96 max-h-80 overflow-hidden rounded-xl border border-border bg-white/95 shadow-xl backdrop-blur dark:bg-gray-900/95">
-      {/* Header */}
-      <div className="flex items-center gap-2 border-b border-border px-4 py-2.5">
+    <div
+      className={cn(
+        'absolute z-30 w-96 max-h-80 overflow-hidden rounded-xl border border-border bg-white/95 shadow-xl backdrop-blur dark:bg-gray-900/95',
+        isDragging && 'cursor-grabbing select-none',
+      )}
+      style={{ left: position.x, bottom: 'auto', top: position.y, right: 'auto' }}
+    >
+      {/* Header — draggable */}
+      <div
+        onMouseDown={handleDragStart}
+        className={cn(
+          'flex items-center gap-2 border-b border-border px-4 py-2.5',
+          !isDragging && 'cursor-grab',
+        )}
+      >
+        <GripVertical className="h-4 w-4 text-muted-foreground/50" />
         <Layers className="h-4 w-4 text-primary-500" />
         <h3 className="text-sm font-semibold">Inspector de Paquetes</h3>
         <span className="ml-auto rounded-full bg-primary-100 px-2 py-0.5 text-[10px] font-medium text-primary-700 dark:bg-primary-900/40 dark:text-primary-300">

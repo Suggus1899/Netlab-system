@@ -8,10 +8,19 @@ import { AppError } from '../middleware/errorHandler';
 export const labsRouter = Router();
 
 // GET /api/labs — list published labs
-labsRouter.get('/', authenticate, async (_req: AuthRequest, res: Response, next: NextFunction) => {
+// Students: only labs from their enrolled courses
+// Teachers/Admins: all published labs
+labsRouter.get('/', authenticate, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
+    const where = req.userRole === Role.STUDENT
+      ? {
+          status: 'PUBLISHED' as const,
+          assignments: { some: { course: { enrollments: { some: { userId: req.userId! } } } } },
+        }
+      : { status: 'PUBLISHED' as const };
+
     const labs = await prisma.lab.findMany({
-      where: { status: 'PUBLISHED' },
+      where,
       include: { steps: { orderBy: { order: 'asc' } } },
       orderBy: { createdAt: 'desc' },
     });

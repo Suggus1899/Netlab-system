@@ -1,0 +1,136 @@
+{
+  "devices": [
+    {
+      "id": "pc1",
+      "type": "PC",
+      "label": "PC1",
+      "x": 150,
+      "y": 350,
+      "interfaces": [
+        {
+          "id": "pc1-eth0",
+          "name": "eth0",
+          "mac": "AA:BB:CC:00:00:01",
+          "ip": "192.168.1.10",
+          "mask": "255.255.255.0",
+          "isUp": true
+        }
+      ],
+      "config": {
+        "gateway": "192.168.1.1",
+        "dnsServer": "192.168.1.1"
+      }
+    },
+    {
+      "id": "pc2",
+      "type": "PC",
+      "label": "PC2",
+      "x": 400,
+      "y": 350,
+      "interfaces": [
+        {
+          "id": "pc2-eth0",
+          "name": "eth0",
+          "mac": "AA:BB:CC:00:00:02",
+          "ip": "192.168.1.20",
+          "mask": "255.255.255.0",
+          "isUp": true
+        }
+      ],
+      "config": {
+        "gateway": "192.168.1.1",
+        "dnsServer": "192.168.1.1"
+      }
+    },
+    {
+      "id": "pc3",
+      "type": "PC",
+      "label": "PC3",
+      "x": 650,
+      "y": 350,
+      "interfaces": [
+        {
+          "id": "pc3-eth0",
+          "name": "eth0",
+          "mac": "AA:BB:CC:00:00:03",
+          "ip": "192.168.1.30",
+          "mask": "255.255.255.0",
+          "isUp": true
+        }
+      ],
+      "config": {
+        "gateway": "192.168.1.1",
+        "dnsServer": "192.168.1.1"
+      }
+    },
+    {
+      "id": "sw1",
+      "type": "SWITCH",
+      "label": "Switch1",
+      "x": 400,
+      "y": 200,
+      "interfaces": [
+        { "id": "sw1-fa0-0", "name": "fa0/0", "mac": "BB:BB:BB:00:00:10", "isUp": true },
+        { "id": "sw1-fa0-1", "name": "fa0/1", "mac": "BB:BB:BB:00:00:11", "isUp": true },
+        { "id": "sw1-fa0-2", "name": "fa0/2", "mac": "BB:BB:BB:00:00:12", "isUp": true },
+        { "id": "sw1-fa0-3", "name": "fa0/3", "mac": "BB:BB:BB:00:00:13", "isUp": true },
+        { "id": "sw1-fa0-4", "name": "fa0/4", "mac": "BB:BB:BB:00:00:14", "isUp": true },
+        { "id": "sw1-fa0-5", "name": "fa0/5", "mac": "BB:BB:BB:00:00:15", "isUp": true },
+        { "id": "sw1-fa0-6", "name": "fa0/6", "mac": "BB:BB:BB:00:00:16", "isUp": true },
+        { "id": "sw1-fa0-7", "name": "fa0/7", "mac": "BB:BB:BB:00:00:17", "isUp": true }
+      ],
+      "config": {}
+    },
+    {
+      "id": "router1",
+      "type": "ROUTER",
+      "label": "Mercusys AC750",
+      "x": 400,
+      "y": 50,
+      "interfaces": [
+        {
+          "id": "router1-eth0",
+          "name": "eth0",
+          "mac": "CC:CC:CC:00:00:20",
+          "ip": "192.168.1.1",
+          "mask": "255.255.255.0",
+          "isUp": true
+        },
+        { "id": "router1-eth1", "name": "eth1", "mac": "CC:CC:CC:00:00:21", "isUp": true },
+        { "id": "router1-eth2", "name": "eth2", "mac": "CC:CC:CC:00:00:22", "isUp": true },
+        { "id": "router1-eth3", "name": "eth3", "mac": "CC:CC:CC:00:00:23", "isUp": true }
+      ],
+      "config": {}
+    }
+  ],
+  "links": [
+    {
+      "id": "link-pc1-sw1",
+      "sourceDeviceId": "pc1",
+      "sourceInterfaceId": "pc1-eth0",
+      "targetDeviceId": "sw1",
+      "targetInterfaceId": "sw1-fa0-0"
+    },
+    {
+      "id": "link-pc2-sw1",
+      "sourceDeviceId": "pc2",
+      "sourceInterfaceId": "pc2-eth0",
+      "targetDeviceId": "sw1",
+      "targetInterfaceId": "sw1-fa0-1"
+    },
+    {
+      "id": "link-pc3-sw1",
+      "sourceDeviceId": "pc3",
+      "sourceInterfaceId": "pc3-eth0",
+      "targetDeviceId": "sw1",
+      "targetInterfaceId": "sw1-fa0-2"
+    },
+    {
+      "id": "link-sw1-router1",
+      "sourceDeviceId": "sw1",
+      "sourceInterfaceId": "sw1-fa0-3",
+      "targetDeviceId": "router1",
+      "targetInterfaceId": "router1-eth0"
+    }
+  ]
+}
